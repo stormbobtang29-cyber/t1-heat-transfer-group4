@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="第四组 T1 一维平壁稳态导热参数敏感性实验台，包含解析求解、参数扫描、无量纲灵敏度、参考算例自检和 A4 报告。">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>第四组 | T1 稳态导热参数敏感性实验台</title>
+  <style>
+    :root {
+      --paper: #f4f3ef;
+      --surface: #fbfaf7;
+      --surface-strong: #ffffff;
+      --ink: #202421;
+      --muted: #626963;
+      --line: #d3d5cf;
+      --line-strong: #9da39c;
+      --accent: #b53a27;
+      --accent-soft: #f1ddd7;
+      --accent-deep: #842919;
+      --ok: #216648;
+      --warn: #7b4f11;
+      --radius: 16px;
+      --radius-small: 10px;
+      --shadow: 0 18px 46px rgba(45, 40, 34, 0.08);
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button, select, input[type="range"] { cursor: pointer; }
+
+    button:active { transform: translateY(1px); }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(181, 58, 39, 0.32);
+      outline-offset: 2px;
+    }
+
+    a { color: inherit; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 68px;
+      border-bottom: 1px solid rgba(157, 163, 156, 0.55);
+      background: rgba(244, 243, 239, 0.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .header-inner {
+      width: min(1440px, calc(100% - 40px));
+      height: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      white-space: nowrap;
+      font-weight: 780;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: var(--radius-small);
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .brand small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    .top-nav a {
+      color: var(--muted);
+      font-size: 14px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .top-nav a:hover { color: var(--ink); }
+
+    .header-actions { display: flex; gap: 8px; }
+
+    .button {
+      min-height: 40px;
+      padding: 9px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-small);
+      background: var(--surface-strong);
+      color: var(--ink);
+      font-weight: 720;
+      line-height: 1;
+      white-space: nowrap;
+      transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 120ms ease;
+    }
+
+    .button:hover { border-color: var(--ink); }
+
+    .button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .button.primary:hover {
+      border-color: var(--accent-deep);
+      background: var(--accent-deep);
+    }
+
+    .button.small { min-height: 34px; padding: 7px 10px; font-size: 13px; }
+
+    .hero {
+      width: min(1440px, calc(100% - 40px));
+      min-height: 430px;
+      margin: 0 auto;
+      padding: 72px 0 56px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+      align-items: end;
+      gap: 8vw;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-copy { max-width: 830px; }
+
+    .eyebrow {
+      margin: 0 0 20px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 760;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 22px;
+      font-size: clamp(44px, 6vw, 84px);
+      line-height: 0.98;
+      letter-spacing: -0.062em;
+      font-weight: 790;
+    }
+
+    .hero-copy > p:not(.eyebrow) {
+      max-width: 640px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 1.6vw, 21px);
+    }
+
+    .hero-proof {
+      align-self: stretch;
+      display: grid;
+      align-content: end;
+      gap: 18px;
+      padding: 28px 0 2px 32px;
+      border-left: 1px solid var(--line-strong);
+    }
+
+    .proof-number {
+      margin-bottom: 2px;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: clamp(38px, 5vw, 68px);
+      font-weight: 730;
+      line-height: 1;
+      letter-spacing: -0.06em;
+    }
+
+    .hero-proof p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .hero-proof strong { color: var(--ink); }
+
+    main {
+      width: min(1440px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    section { scroll-margin-top: 84px; }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 28px;
+    }
+
+    .section-head h2 {
+      margin-bottom: 10px;
+      font-size: clamp(30px, 3.5vw, 48px);
+      line-height: 1.06;
+      letter-spacing: -0.045em;
+    }
+
+    .section-head p { margin: 0; color: var(--muted); font-size: 16px; }
+
+    .lab-section { padding: 64px 0 78px; }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.48fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .control-panel {
+      position: sticky;
+      top: 88px;
+      max-height: calc(100dvh - 108px);
+      overflow: auto;
+      padding: 20px;
+      scrollbar-width: thin;
+    }
+
+    .model-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .model-button {
+      min-height: 64px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .model-button strong { display: block; margin-bottom: 3px; color: inherit; font-size: 15px; }
+    .model-button span { font-size: 12px; }
+
+    .model-button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+    }
+
+    .control-group {
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .control-group:first-of-type { border-top: 0; padding-top: 0; }
+
+    .control-group-title {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .field label { color: var(--ink); font-size: 14px; font-weight: 690; }
+
+    .field .unit { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 100px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-small);
+      background: var(--surface-strong);
+      color: var(--ink);
+    }
+
+    input[type="number"], input[type="text"], input[type="date"], select {
+      min-height: 40px;
+      padding: 8px 10px;
+    }
+
+    input[type="number"] { font-family: var(--mono); font-size: 13px; }
+
+    textarea { min-height: 70px; padding: 10px; resize: vertical; font-size: 13px; }
+
+    .material-source {
+      margin-top: 10px;
+      padding: 12px;
+      border-left: 3px solid var(--accent);
+      background: #f2f0eb;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .control-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .visual-panel { padding: 22px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--line);
+    }
+
+    .metric {
+      min-height: 116px;
+      padding: 18px;
+      background: var(--surface-strong);
+    }
+
+    .metric-label { margin-bottom: 14px; color: var(--muted); font-size: 12px; }
+
+    .metric-value {
+      font-family: var(--mono);
+      font-size: clamp(21px, 2.2vw, 32px);
+      font-weight: 730;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      white-space: nowrap;
+    }
+
+    .metric-unit { margin-top: 7px; color: var(--muted); font-family: var(--mono); font-size: 10px; }
+
+    .chart-shell {
+      position: relative;
+      min-height: 420px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      overflow: hidden;
+    }
+
+    .chart-toolbar {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      pointer-events: none;
+    }
+
+    .chart-toolbar h3 { margin: 0 0 3px; font-size: 16px; }
+    .chart-toolbar p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .chart-badge {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    canvas { display: block; width: 100%; }
+    #temperatureChart { height: 420px; }
+
+    .equation-band {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: var(--radius-small);
+      background: #eceae4;
+    }
+
+    .equation {
+      overflow-x: auto;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .direction { color: var(--muted); font-size: 12px; text-align: right; }
+
+    .warning-box {
+      display: none;
+      margin-top: 16px;
+      padding: 13px 15px;
+      border: 1px solid #c69b5f;
+      border-radius: var(--radius-small);
+      background: #f6ead7;
+      color: #5e3c0c;
+      font-size: 13px;
+    }
+
+    .warning-box.show { display: block; }
+
+    .sensitivity-section {
+      padding: 78px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .analysis-toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: end;
+      margin: 0 0 20px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .compact-field label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .span-control {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) 66px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .span-value {
+      min-height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-small);
+      background: #fff;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 0.88fr 1.12fr;
+      gap: 20px;
+    }
+
+    .analysis-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+    }
+
+    .analysis-card h3 { margin-bottom: 4px; font-size: 18px; }
+    .analysis-card > p { margin-bottom: 18px; color: var(--muted); font-size: 13px; }
+
+    #elasticityChart, #sweepChart { height: 320px; }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .insight {
+      min-height: 132px;
+      padding: 17px;
+      border-top: 3px solid var(--accent);
+      background: #eceae4;
+    }
+
+    .insight strong { display: block; margin-bottom: 8px; font-size: 14px; }
+    .insight p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .table-wrap {
+      margin-top: 20px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th, td {
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    th:first-child, td:first-child { text-align: left; }
+    th { background: #eeece7; color: var(--muted); font-family: var(--sans); font-weight: 730; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr.base-row { background: var(--accent-soft); color: var(--accent-deep); font-weight: 730; }
+
+    .verification-section {
+      padding: 78px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .verification-layout {
+      display: grid;
+      grid-template-columns: 0.72fr 1.28fr;
+      gap: 36px;
+      align-items: start;
+    }
+
+    .verification-copy h2 {
+      margin-bottom: 12px;
+      font-size: clamp(30px, 3.5vw, 48px);
+      line-height: 1.06;
+      letter-spacing: -0.045em;
+    }
+
+    .verification-copy p { color: var(--muted); }
+
+    .assumption-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .assumption {
+      min-height: 94px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--surface);
+      font-size: 13px;
+    }
+
+    .assumption b { display: block; margin-bottom: 5px; }
+
+    .test-list { display: grid; gap: 10px; }
+
+    .test-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      background: var(--surface-strong);
+    }
+
+    .test-state {
+      min-width: 54px;
+      padding: 5px 7px;
+      border-radius: 7px;
+      background: #e2eee7;
+      color: var(--ok);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 780;
+      text-align: center;
+    }
+
+    .test-item.fail .test-state { background: #f2ddd8; color: var(--accent-deep); }
+    .test-item.na .test-state { background: #e7e7e3; color: var(--muted); }
+    .test-title { font-size: 14px; font-weight: 730; }
+    .test-detail { color: var(--muted); font-size: 12px; }
+    .test-error { color: var(--muted); font-family: var(--mono); font-size: 11px; text-align: right; }
+
+    .report-section {
+      padding: 78px 0 92px;
+      border-top: 1px solid var(--line);
+    }
+
+    .report-tools {
+      display: grid;
+      grid-template-columns: 1fr 1fr 170px auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .report-shell {
+      overflow-x: auto;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #deddd8;
+    }
+
+    .report-paper {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 12mm 13mm;
+      background: #fff;
+      color: #222522;
+      box-shadow: var(--shadow);
+      font-family: "Microsoft YaHei", var(--sans);
+    }
+
+    .report-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14mm;
+      align-items: end;
+      padding-bottom: 5mm;
+      border-bottom: 2px solid #222522;
+    }
+
+    .report-kicker { margin-bottom: 2mm; color: var(--accent); font-size: 9pt; font-weight: 780; }
+
+    .report-header h2 {
+      margin: 0;
+      font-size: 22pt;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .report-meta { font-size: 9pt; text-align: right; line-height: 1.7; }
+    .report-meta b { font-family: var(--mono); }
+
+    .report-summary {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 5mm;
+      margin: 5mm 0;
+    }
+
+    .report-block {
+      padding: 4mm;
+      border: 1px solid #c8cac5;
+      border-radius: 3mm;
+    }
+
+    .report-block h3 {
+      margin: 0 0 2mm;
+      font-size: 10pt;
+    }
+
+    .report-model-text { margin: 0; font-size: 9pt; line-height: 1.65; }
+
+    .report-key-number {
+      display: flex;
+      min-height: 27mm;
+      flex-direction: column;
+      justify-content: center;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 22pt;
+      font-weight: 760;
+      line-height: 1;
+    }
+
+    .report-key-number small {
+      margin-top: 2mm;
+      color: #5f655f;
+      font-family: var(--sans);
+      font-size: 8pt;
+      font-weight: 500;
+    }
+
+    .report-charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5mm;
+    }
+
+    .report-chart h3 { margin: 0 0 1.5mm; font-size: 9pt; }
+    .report-chart canvas { height: 42mm; border: 1px solid #d3d5cf; border-radius: 3mm; }
+
+    .report-findings {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 3mm;
+      margin-top: 5mm;
+    }
+
+    .report-finding {
+      min-height: 31mm;
+      padding: 3.5mm;
+      border-top: 2px solid var(--accent);
+      background: #f1f0ec;
+      font-size: 8.5pt;
+      line-height: 1.55;
+    }
+
+    .report-finding b { display: block; margin-bottom: 1.5mm; font-size: 9pt; }
+
+    .report-bottom {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 5mm;
+      margin-top: 5mm;
+    }
+
+    .report-bottom h3 { margin: 0 0 1.5mm; font-size: 9pt; }
+    .report-bottom p { margin: 0 0 1.5mm; font-size: 8pt; line-height: 1.55; }
+
+    .report-limitations {
+      margin-top: 4mm;
+      padding: 3mm 3.5mm;
+      border-left: 2px solid var(--accent);
+      background: #f1f0ec;
+      font-size: 7.8pt;
+      line-height: 1.55;
+    }
+
+    .report-limitations b { margin-right: 2mm; }
+
+    .mini-table th, .mini-table td { padding: 1.8mm 2mm; font-size: 7.5pt; }
+    .mini-table th { background: #efeee9; }
+
+    .report-footer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6mm;
+      margin-top: 4mm;
+      padding-top: 3mm;
+      border-top: 1px solid #aeb2ac;
+      color: #626963;
+      font-size: 7.2pt;
+      line-height: 1.45;
+    }
+
+    .page-footer {
+      padding: 28px 0 50px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 30px;
+    }
+
+    .page-footer p { margin-bottom: 6px; }
+    .page-footer b { color: var(--ink); }
+
+    .toast {
+      position: fixed;
+      z-index: 40;
+      right: 22px;
+      bottom: 22px;
+      max-width: 340px;
+      padding: 13px 15px;
+      border-radius: var(--radius-small);
+      background: #252a26;
+      color: #fff;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .top-nav { display: none; }
+      .header-inner { grid-template-columns: 1fr auto; }
+      .hero { grid-template-columns: 1fr; gap: 40px; }
+      .hero-proof { max-width: 520px; padding-left: 24px; }
+      .lab-grid, .analysis-grid, .verification-layout { grid-template-columns: 1fr; }
+      .control-panel { position: static; max-height: none; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .report-shell { padding: 12px; }
+    }
+
+    @media (max-width: 760px) {
+      .site-header { height: auto; min-height: 64px; }
+      .header-inner { width: min(100% - 24px, 1440px); padding: 10px 0; }
+      .brand small { display: none; }
+      .header-actions .button:first-child { display: none; }
+      .hero, main { width: min(100% - 24px, 1440px); }
+      .hero { min-height: 0; padding: 52px 0 42px; }
+      h1 { font-size: clamp(38px, 11vw, 48px); }
+      .lab-section, .sensitivity-section, .verification-section, .report-section { padding: 52px 0; }
+      .visual-panel, .analysis-card { padding: 14px; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric { min-height: 106px; padding: 14px; }
+      .metric-value { font-size: 22px; }
+      .chart-shell, #temperatureChart { min-height: 350px; height: 350px; }
+      .equation-band { grid-template-columns: 1fr; }
+      .direction { text-align: left; }
+      .analysis-toolbar, .report-tools { grid-template-columns: 1fr; }
+      .insight-grid, .assumption-list { grid-template-columns: 1fr; }
+      .test-item { grid-template-columns: auto 1fr; }
+      .test-error { grid-column: 2; text-align: left; }
+      .report-paper { transform-origin: top left; }
+      .report-shell { overflow: auto; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+
+    @page { size: A4 portrait; margin: 0; }
+
+    @media print {
+      body { background: #fff; }
+      .site-header, .hero, main > section:not(#report), .page-footer, .report-section > .section-head,
+      .report-tools, .toast { display: none !important; }
+      main { width: auto; margin: 0; }
+      .report-section { padding: 0; border: 0; }
+      .report-shell { padding: 0; border: 0; overflow: visible; background: #fff; }
+      .report-paper { width: 210mm; height: 297mm; min-height: 297mm; margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand" aria-label="第四组稳态导热实验台">
+        <span class="brand-mark">G4</span>
+        <span>T1 稳态导热 <small>参数敏感性实验台</small></span>
+      </div>
+      <nav class="top-nav" aria-label="页面导航">
+        <a href="#lab">解析实验</a>
+        <a href="#sensitivity">敏感性</a>
+        <a href="#verification">自检</a>
+        <a href="#report">A4 报告</a>
+      </nav>
+      <div class="header-actions">
+        <button class="button" id="resetButton" type="button">恢复基准</button>
+        <button class="button primary" id="printButton" type="button">打印报告</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="pageTitle">
+    <div class="hero-copy">
+      <p class="eyebrow">Group 04 / Parameter sensitivity</p>
+      <h1 id="pageTitle">找到真正<br>控制热流的参数。</h1>
+      <p>同一套解析解，联动温度场、热流、标准化灵敏度和参数扫描。每一个结论都能追溯到具体数字。</p>
+    </div>
+    <div class="hero-proof" aria-label="项目关键证明">
+      <div>
+        <div class="proof-number" id="heroTestScore">8/8</div>
+        <p><strong>内置自检通过</strong><br>参考算例、能量守恒与解析导数同时核对</p>
+      </div>
+      <p>坐标约定严格采用半厚 δ。S1 为 x∈[0,δ]，S2 为 x∈[-δ,δ]。</p>
+    </div>
+  </section>
+
+  <main>
+    <section class="lab-section" id="lab" aria-labelledby="labTitle">
+      <div class="section-head">
+        <h2 id="labTitle">解析实验台</h2>
+        <p>先锁定物理对象，再改参数。图线、读数、公式、热量口径和风险提示会同步更新。</p>
+      </div>
+
+      <div class="lab-grid">
+        <aside class="panel control-panel" aria-label="物理参数控制区">
+          <div class="model-switch" role="group" aria-label="选择边界条件">
+            <button class="model-button" id="modeS1" type="button" aria-pressed="true">
+              <strong>S1 无内热源</strong>
+              <span>左定温 / 右对流</span>
+            </button>
+            <button class="model-button" id="modeS2" type="button" aria-pressed="false">
+              <strong>S2 均匀内热源</strong>
+              <span>双侧对称恒温</span>
+            </button>
+          </div>
+
+          <div class="control-group">
+            <div class="control-group-title">材料与数据来源</div>
+            <div class="field">
+              <label for="materialSelect">材料预设</label>
+              <select id="materialSelect">
+                <option value="masonry">混凝土/砖，课程基准</option>
+                <option value="steel">碳钢</option>
+                <option value="aluminum">铝</option>
+                <option value="custom">自定义材料</option>
+              </select>
+            </div>
+            <div id="materialSource" class="material-source"></div>
+          </div>
+
+          <div id="commonControls" class="control-group"></div>
+          <div id="modeControls" class="control-group"></div>
+
+          <div class="control-group">
+            <div class="control-group-title">来源记录</div>
+            <div class="field">
+              <label for="sourceInput">物性来源，可编辑</label>
+              <textarea id="sourceInput" spellcheck="false"></textarea>
+            </div>
+            <p class="control-note">正式提交前请按老师指定版本补齐页码或标准编号。当前值优先保证与课程任务单可比。</p>
+          </div>
+        </aside>
+
+        <div class="panel visual-panel">
+          <div class="metrics" id="metrics" aria-live="polite"></div>
+
+          <div class="chart-shell">
+            <div class="chart-toolbar">
+              <div>
+                <h3>温度分布 t(x)</h3>
+                <p id="chartSubtitle">S1 线性温度场</p>
+              </div>
+              <div class="chart-badge" id="chartBadge">解析解</div>
+            </div>
+            <canvas id="temperatureChart" role="img" aria-label="一维平壁温度分布图"></canvas>
+          </div>
+
+          <div class="equation-band">
+            <div class="equation" id="equationText"></div>
+            <div class="direction" id="directionText"></div>
+          </div>
+          <div class="warning-box" id="warningBox" role="status"></div>
+          <div class="sr-only" id="accessibleSummary" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sensitivity-section" id="sensitivity" aria-labelledby="sensitivityTitle">
+      <div class="section-head">
+        <h2 id="sensitivityTitle">第四组的尺子：参数敏感性</h2>
+        <p>采用单因素法和无量纲局部灵敏度。前者给出实际变化量，后者消除单位影响后比较控制强弱。</p>
+      </div>
+
+      <div class="analysis-toolbar">
+        <div class="compact-field">
+          <label for="responseTarget">分析响应量</label>
+          <select id="responseTarget"></select>
+        </div>
+        <div class="compact-field">
+          <label for="sweepParameter">扫描参数</label>
+          <select id="sweepParameter"></select>
+        </div>
+        <div class="compact-field">
+          <label for="sweepSpan">扫描范围</label>
+          <div class="span-control">
+            <input id="sweepSpan" type="range" min="10" max="50" step="5" value="30">
+            <span class="span-value" id="sweepSpanValue">±30%</span>
+          </div>
+        </div>
+        <button class="button" id="csvButton" type="button">导出实验数据</button>
+      </div>
+
+      <div class="analysis-grid">
+        <article class="analysis-card">
+          <h3>标准化局部灵敏度</h3>
+          <p>S* = (p/y)(∂y/∂p)。绝对值越大，输出对该参数越敏感。</p>
+          <canvas id="elasticityChart" role="img" aria-label="标准化局部灵敏度对比图"></canvas>
+        </article>
+        <article class="analysis-card">
+          <h3>单因素响应曲线</h3>
+          <p id="sweepDescription">只改变一个参数，其余条件保持基准值。</p>
+          <canvas id="sweepChart" role="img" aria-label="单因素参数扫描响应曲线"></canvas>
+        </article>
+      </div>
+
+      <div class="insight-grid" id="insightGrid"></div>
+
+      <div class="table-wrap">
+        <table aria-label="参数扫描实验数据">
+          <thead id="sweepTableHead"></thead>
+          <tbody id="sweepTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="verification-section" id="verification" aria-labelledby="verificationTitle">
+      <div class="verification-layout">
+        <div class="verification-copy">
+          <h2 id="verificationTitle">先证明程序可信，再讨论趋势。</h2>
+          <p>程序启动时自动运行参考算例、能量闭合和灵敏度差分复核。验收不是一句“看起来正确”，而是一组可重复的测试。</p>
+          <div class="assumption-list">
+            <div class="assumption"><b>一维稳态</b>忽略沿壁面方向温差，温度不随时间变化。</div>
+            <div class="assumption"><b>常物性</b>ρ、c、λ 在所研究温区内视为常数。</div>
+            <div class="assumption"><b>接触理想</b>不计接触热阻与辐射，仅保留题设换热过程。</div>
+            <div class="assumption"><b>面积口径</b>默认 A=1.00 m²，总传热量按当前面积计算。</div>
+          </div>
+        </div>
+        <div class="test-list" id="testList" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="report-section" id="report" aria-labelledby="reportTitle">
+      <div class="section-head">
+        <h2 id="reportTitle">一页 A4 视角报告</h2>
+        <p>当前工况、图表、数字结论和验证证据自动排版。填写成员后即可打印或另存为 PDF。</p>
+      </div>
+
+      <div class="report-tools">
+        <div class="compact-field">
+          <label for="teamName">课程或班级</label>
+          <input id="teamName" type="text" value="请填写课程与班级">
+        </div>
+        <div class="compact-field">
+          <label for="memberNames">小组成员</label>
+          <input id="memberNames" type="text" value="请填写成员姓名">
+        </div>
+        <div class="compact-field">
+          <label for="reportDate">日期</label>
+          <input id="reportDate" type="date">
+        </div>
+        <button class="button primary" id="printReportButton" type="button">打印这一页</button>
+      </div>
+
+      <div class="report-shell">
+        <article class="report-paper" aria-label="第四组参数敏感性 A4 报告">
+          <header class="report-header">
+            <div>
+              <div class="report-kicker">T1 一维平壁稳态导热 / 第四组</div>
+              <h2>参数敏感性视角报告</h2>
+            </div>
+            <div class="report-meta">
+              <div id="reportTeam">请填写课程与班级</div>
+              <div>成员：<span id="reportMembers">请填写成员姓名</span></div>
+              <div>日期：<b id="reportDateText"></b></div>
+            </div>
+          </header>
+
+          <div class="report-summary">
+            <div class="report-block">
+              <h3>基准工况与解析模型</h3>
+              <p class="report-model-text" id="reportModelText"></p>
+            </div>
+            <div class="report-block">
+              <h3>核心输出</h3>
+              <div class="report-key-number" id="reportKeyNumber"></div>
+            </div>
+          </div>
+
+          <div class="report-charts">
+            <div class="report-chart">
+              <h3>温度分布</h3>
+              <canvas id="reportTemperatureChart" role="img" aria-label="报告中的温度分布图"></canvas>
+            </div>
+            <div class="report-chart">
+              <h3>标准化局部灵敏度</h3>
+              <canvas id="reportElasticityChart" role="img" aria-label="报告中的参数灵敏度图"></canvas>
+            </div>
+          </div>
+
+          <div class="report-findings" id="reportFindings"></div>
+
+          <div class="report-bottom">
+            <div class="report-block">
+              <h3>方法、公式与判断标准</h3>
+              <p id="reportMethod"></p>
+              <p id="reportEquation"></p>
+              <p><b>判断：</b>比较 |S*| 排名；再用单因素 ±20% 实验检查实际变化与非线性。</p>
+            </div>
+            <div class="report-block">
+              <h3>±20% 对照实验</h3>
+              <table class="mini-table" aria-label="报告中的正负百分之二十实验表">
+                <thead id="reportMiniHead"></thead>
+                <tbody id="reportMiniBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="report-limitations">
+            <b>适用范围与局限</b>
+            本结论基于一维、稳态、常物性和单因素法；灵敏度取决于所选输出与基准工况。多参数耦合需进一步采用二维扫描，正式数值以教师锁定设定卡为准。
+          </div>
+
+          <footer class="report-footer">
+            <div><b>验证：</b><span id="reportValidation"></span></div>
+            <div><b>物性来源：</b><span id="reportSource"></span></div>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <div class="footer-grid">
+        <div>
+          <p><b>总传热量口径：</b>S1 为 Φ=qA；S2 同时给单侧 qA 与双侧总散热 2qA。</p>
+          <p><b>符号：</b>q 为热流密度，Φ 为传热量，Φ<sub>v</sub> 为体积热源强度。</p>
+        </div>
+        <div>
+          <p><b>课程坐标：</b>半厚 δ，中心 x=0，表面 x=±δ。</p>
+          <p>本页离线运行，不依赖网络、框架或外部图表库。</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    'use strict';
+
+    const ACCENT = '#b53a27';
+    const ACCENT_DEEP = '#842919';
+    const INK = '#202421';
+    const MUTED = '#626963';
+    const GRID = '#d8dad4';
+    const SURFACE = '#fbfaf7';
+
+    const materials = {
+      masonry: {
+        label: '混凝土/砖，课程基准', rho: 800, cp: 2000, lambda: 1.2,
+        source: '《T1 导热·学生任务单（稳态部分）》§二材料库，课程参考范围取值；正式版待教师锁定设定卡或指定手册页码确认。'
+      },
+      steel: {
+        label: '碳钢', rho: 7850, cp: 460, lambda: 45,
+        source: '《T1 导热·学生任务单（稳态部分）》§二材料库，碳钢教学取值；正式版待补老师认可的查表来源与温度。'
+      },
+      aluminum: {
+        label: '铝', rho: 2700, cp: 900, lambda: 237,
+        source: '《T1 导热·学生任务单（稳态部分）》§二材料库；λ 取课程范围 200-400 W/(m·K) 内的演示值，正式版待补查表来源与温度。'
+      },
+      custom: {
+        label: '自定义材料', rho: 1000, cp: 1000, lambda: 1,
+        source: '请填写材料手册、教材版本与页码，必要时注明查表温度。'
+      }
+    };
+
+    const defaults = {
+      mode: 'S1',
+      material: 'masonry',
+      source: materials.masonry.source,
+      sweepParameter: 'h',
+      responseTarget: 'q',
+      sweepSpan: 30,
+      params: {
+        delta: 0.05,
+        lambda: 1.2,
+        rho: 800,
+        cp: 2000,
+        area: 1,
+        ts1: 100,
+        h: 10,
+        tinf: 20,
+        ts: 20,
+        phiv: 5000
+      }
+    };
+
+    const cloneValue = (value) => typeof window.structuredClone === 'function'
+      ? window.structuredClone(value)
+      : JSON.parse(JSON.stringify(value));
+
+    const state = cloneValue(defaults);
+
+    const commonDefinitions = [
+      { key: 'delta', label: '半厚 δ', unit: 'm', min: 0.005, max: 0.10, step: 0.001, digits: 3 },
+      { key: 'lambda', label: '导热系数 λ', unit: 'W/(m·K)', min: 0.5, max: 400, step: 0.1, digits: 1 },
+      { key: 'rho', label: '密度 ρ', unit: 'kg/m³', min: 100, max: 10000, step: 10, digits: 0 },
+      { key: 'cp', label: '比热容 c', unit: 'J/(kg·K)', min: 100, max: 3000, step: 10, digits: 0 },
+      { key: 'area', label: '计算面积 A', unit: 'm²', min: 0.1, max: 10, step: 0.1, digits: 2 }
+    ];
+
+    const s1Definitions = [
+      { key: 'ts1', label: '左端温度 tₛ₁', unit: '°C', min: 20, max: 100, step: 1, digits: 0 },
+      { key: 'tinf', label: '流体温度 t∞', unit: '°C', min: 0, max: 40, step: 1, digits: 0 },
+      { key: 'h', label: '对流系数 h', unit: 'W/(m²·K)', min: 5, max: 200, step: 1, digits: 0 }
+    ];
+
+    const s2Definitions = [
+      { key: 'ts', label: '表面温度 tₛ', unit: '°C', min: 20, max: 100, step: 1, digits: 0 },
+      { key: 'phiv', label: '体积热源 Φᵥ', unit: 'W/m³', min: 0, max: 10000, step: 100, digits: 0 }
+    ];
+
+    const sweepOptions = {
+      S1: [
+        { key: 'deltaT', label: '驱动温差 ΔT=tₛ₁-t∞' },
+        { key: 'h', label: '对流系数 h' },
+        { key: 'lambda', label: '导热系数 λ' },
+        { key: 'delta', label: '半厚 δ' }
+      ],
+      S2: [
+        { key: 'delta', label: '半厚 δ' },
+        { key: 'phiv', label: '体积热源 Φᵥ' },
+        { key: 'lambda', label: '导热系数 λ' }
+      ]
+    };
+
+    const responseOptions = {
+      S1: [
+        { key: 'q', label: '表面热流 q' },
+        { key: 'surfaceExcess', label: '右表面过余温度 t(δ)-t∞' }
+      ],
+      S2: [
+        { key: 'rise', label: '中心温升 Δt_c' },
+        { key: 'q', label: '单侧表面热流 q' }
+      ]
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function finite(value) {
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function fixedSmart(value, digits = 2) {
+      if (!Number.isFinite(value)) return '未定义';
+      const abs = Math.abs(value);
+      if (abs !== 0 && (abs >= 100000 || abs < 0.001)) return value.toExponential(3);
+      return value.toLocaleString('zh-CN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+
+    function percent(value, digits = 1) {
+      if (!Number.isFinite(value)) return '未定义';
+      return `${value >= 0 ? '+' : ''}${(value * 100).toFixed(digits)}%`;
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>'"]/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+      }[char]));
+    }
+
+    function calculateS1(p) {
+      const deltaT = p.ts1 - p.tinf;
+      const rCond = p.delta / p.lambda;
+      const rConv = 1 / p.h;
+      const rTotal = rCond + rConv;
+      const q = deltaT / rTotal;
+      const tRight = p.ts1 - q * p.delta / p.lambda;
+      const bi = p.h * p.delta / p.lambda;
+      return {
+        mode: 'S1', deltaT, rCond, rConv, rTotal, q, tRight, bi,
+        phi: q * p.area,
+        diffusivity: p.lambda / (p.rho * p.cp),
+        temp: (x) => p.ts1 - q * x / p.lambda
+      };
+    }
+
+    function calculateS2(p) {
+      const rise = p.phiv * p.delta * p.delta / (2 * p.lambda);
+      const centerTemp = p.ts + rise;
+      const q = p.phiv * p.delta;
+      const phiSide = q * p.area;
+      const phiTotal = 2 * phiSide;
+      const generated = p.phiv * (2 * p.delta) * p.area;
+      return {
+        mode: 'S2', rise, centerTemp, q, phiSide, phiTotal, generated,
+        balanceError: generated === 0 ? 0 : (phiTotal - generated) / generated,
+        diffusivity: p.lambda / (p.rho * p.cp),
+        temp: (x) => p.ts + (p.phiv / (2 * p.lambda)) * (p.delta * p.delta - x * x)
+      };
+    }
+
+    function calculate(p = state.params, mode = state.mode) {
+      return mode === 'S1' ? calculateS1(p) : calculateS2(p);
+    }
+
+    function buildControl(def) {
+      const value = state.params[def.key];
+      return `
+        <div class="field">
+          <div class="field-top">
+            <label for="range-${def.key}">${def.label}</label>
+            <span class="unit">${def.unit}</span>
+          </div>
+          <div class="range-row">
+            <input id="range-${def.key}" data-param="${def.key}" data-kind="range" type="range"
+              min="${def.min}" max="${def.max}" step="${def.step}" value="${value}">
+            <input aria-label="${def.label}数值" data-param="${def.key}" data-kind="number" type="number"
+              min="${def.min}" max="${def.max}" step="${def.step}" value="${value}">
+          </div>
+        </div>`;
+    }
+
+    function bindParameterInputs(container) {
+      container.querySelectorAll('[data-param]').forEach((input) => {
+        input.addEventListener('input', (event) => {
+          const key = event.target.dataset.param;
+          const def = [...commonDefinitions, ...s1Definitions, ...s2Definitions].find((item) => item.key === key);
+          let value = Number(event.target.value);
+          if (!Number.isFinite(value)) return;
+          value = clamp(value, def.min, def.max);
+          state.params[key] = value;
+          event.target.value = value;
+          container.querySelectorAll(`[data-param="${key}"]`).forEach((peer) => {
+            if (peer !== event.target) peer.value = value;
+          });
+          if (['lambda', 'rho', 'cp'].includes(key)) {
+            const switchedToCustom = state.material !== 'custom';
+            state.material = 'custom';
+            if (switchedToCustom) state.source = materials.custom.source;
+          }
+          $('materialSelect').value = state.material;
+          renderAll();
+        });
+      });
+    }
+
+    function buildControls() {
+      $('commonControls').innerHTML = `<div class="control-group-title">几何与物性</div>${commonDefinitions.map(buildControl).join('')}`;
+      const defs = state.mode === 'S1' ? s1Definitions : s2Definitions;
+      $('modeControls').innerHTML = `<div class="control-group-title">${state.mode === 'S1' ? 'S1 边界条件' : 'S2 边界条件'}</div>${defs.map(buildControl).join('')}`;
+      bindParameterInputs($('commonControls'));
+      bindParameterInputs($('modeControls'));
+    }
+
+    function renderModeButtons() {
+      $('modeS1').setAttribute('aria-pressed', String(state.mode === 'S1'));
+      $('modeS2').setAttribute('aria-pressed', String(state.mode === 'S2'));
+    }
+
+    function renderMaterial() {
+      $('materialSelect').value = state.material;
+      $('sourceInput').value = state.source;
+      const material = materials[state.material];
+      $('materialSource').innerHTML = `<b>${escapeHtml(material.label)}</b><br>热扩散率 a 由 λ/(ρc) 实时计算。当前默认值用于参考算例自测，不替代教师锁定设定卡。`;
+    }
+
+    function metric(label, value, unit) {
+      return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value">${value}</div><div class="metric-unit">${unit}</div></div>`;
+    }
+
+    function renderMetrics(result) {
+      if (state.mode === 'S1') {
+        $('metrics').innerHTML = [
+          metric('右表面温度 t(δ)', fixedSmart(result.tRight, 2), '°C'),
+          metric('表面热流密度 q', fixedSmart(result.q, 1), 'W/m²'),
+          metric('总传热量 Φ=qA', fixedSmart(result.phi, 1), 'W'),
+          metric('Bi=hδ/λ', fixedSmart(result.bi, 3), '无量纲')
+        ].join('');
+        $('equationText').textContent = 'q = (tₛ₁ - t∞) / (δ/λ + 1/h)；t(x) = tₛ₁ - (q/λ)x';
+        $('directionText').textContent = Math.abs(result.q) < 1e-12
+          ? '驱动温差为 0，无净热流'
+          : result.q > 0 ? '热量沿 +x 方向传递' : '热量沿 -x 方向传递';
+        $('chartSubtitle').textContent = 'S1 线性温度场，斜率为 -q/λ';
+        $('chartBadge').textContent = `Bi ${fixedSmart(result.bi, 3)}`;
+      } else {
+        $('metrics').innerHTML = [
+          metric('中心温度 t_c', fixedSmart(result.centerTemp, 2), '°C'),
+          metric('单侧表面热流 q', fixedSmart(result.q, 1), 'W/m²'),
+          metric('双侧总散热 Φ', fixedSmart(result.phiTotal, 1), 'W'),
+          metric('中心温升 Δt_c', fixedSmart(result.rise, 2), 'K')
+        ].join('');
+        $('equationText').textContent = 't(x) = tₛ + [Φᵥ/(2λ)](δ² - x²)；q_s = Φᵥδ';
+        $('directionText').textContent = Math.abs(result.q) < 1e-12
+          ? '无体积热源，全场等温且无净热流'
+          : '热量由中心分别流向两个表面';
+        $('chartSubtitle').textContent = 'S2 对称抛物线温度场，中心温度最高';
+        $('chartBadge').textContent = `闭合误差 ${Math.abs(result.balanceError).toExponential(1)}`;
+      }
+    }
+
+    function renderWarnings(result) {
+      const warnings = [];
+      if (!state.source.trim()) warnings.push('物性来源为空，正式提交会触发任务单红线。');
+      if (Math.abs(state.params.area - 1) < 1e-12) warnings.push('当前总传热量按单位面积 A=1.00 m² 计算，报告中已明确口径。');
+      if (state.mode === 'S1' && result.deltaT <= 0) warnings.push('tₛ₁≤t∞，热流方向与默认正方向相反；公式仍有效，但报告需解释符号。');
+      if (state.mode === 'S2' && state.params.phiv === 0) warnings.push('Φᵥ=0 时中心温升和热流均为零，归一化数值灵敏度无法由相对变化计算。');
+      const box = $('warningBox');
+      box.classList.toggle('show', warnings.length > 0);
+      box.innerHTML = warnings.map((item) => escapeHtml(item)).join('<br>');
+    }
+
+    function setupCanvas(canvas, forcedHeight) {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(280, rect.width || canvas.parentElement.clientWidth || 600);
+      const height = forcedHeight || Math.max(180, rect.height || 320);
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      return { ctx, width, height };
+    }
+
+    function drawTemperature(canvas, compact = false) {
+      const result = calculate();
+      const p = state.params;
+      const dims = setupCanvas(canvas, compact ? canvas.getBoundingClientRect().height || 160 : undefined);
+      const { ctx, width: w, height: h } = dims;
+      const pad = compact ? { l: 42, r: 14, t: 18, b: 30 } : { l: 62, r: 24, t: 78, b: 48 };
+      const xMin = state.mode === 'S1' ? 0 : -p.delta;
+      const xMax = p.delta;
+      const points = [];
+      let tMin = Infinity;
+      let tMax = -Infinity;
+      for (let i = 0; i <= 160; i++) {
+        const x = xMin + (xMax - xMin) * i / 160;
+        const t = result.temp(x);
+        points.push({ x, t });
+        tMin = Math.min(tMin, t);
+        tMax = Math.max(tMax, t);
+      }
+      const tSpan = Math.max(tMax - tMin, 1);
+      const yMin = tMin - tSpan * 0.14;
+      const yMax = tMax + tSpan * 0.14;
+      const px = (x) => pad.l + (x - xMin) / (xMax - xMin) * (w - pad.l - pad.r);
+      const py = (t) => h - pad.b - (t - yMin) / (yMax - yMin) * (h - pad.t - pad.b);
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = `${compact ? 9 : 11}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textBaseline = 'middle';
+
+      for (let i = 0; i <= 4; i++) {
+        const t = yMin + (yMax - yMin) * i / 4;
+        const y = py(t);
+        ctx.strokeStyle = GRID;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(w - pad.r, y);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'right';
+        ctx.fillText(t.toFixed(tSpan < 5 ? 1 : 0), pad.l - 8, y);
+      }
+
+      ctx.fillStyle = 'rgba(181, 58, 39, 0.055)';
+      ctx.fillRect(pad.l, pad.t, w - pad.l - pad.r, h - pad.t - pad.b);
+
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = compact ? 2.2 : 3;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(px(point.x), py(point.t));
+        else ctx.lineTo(px(point.x), py(point.t));
+      });
+      ctx.stroke();
+
+      const markerIndices = state.mode === 'S1' ? [0, points.length - 1] : [0, 80, points.length - 1];
+      markerIndices.forEach((index) => {
+        const point = points[index];
+        ctx.fillStyle = ACCENT_DEEP;
+        ctx.beginPath();
+        ctx.arc(px(point.x), py(point.t), compact ? 3 : 4.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = MUTED;
+      ctx.textAlign = 'center';
+      const xTicks = state.mode === 'S1' ? [xMin, (xMin + xMax) / 2, xMax] : [xMin, 0, xMax];
+      xTicks.forEach((x) => ctx.fillText(x.toFixed(3), px(x), h - pad.b + (compact ? 16 : 20)));
+      ctx.textAlign = 'left';
+      ctx.fillText('x / m', w - pad.r - (compact ? 28 : 34), h - (compact ? 8 : 14));
+      ctx.save();
+      ctx.translate(compact ? 10 : 15, pad.t + 6);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('t / °C', 0, 0);
+      ctx.restore();
+    }
+
+    function getElasticities() {
+      const p = state.params;
+      if (state.mode === 'S1') {
+        const result = calculateS1(p);
+        const denominator = 1 + result.bi;
+        if (state.responseTarget === 'surfaceExcess') {
+          return finalizeElasticities([
+            { key: 'deltaT', label: '温差 ΔT', value: 1, note: '线性正相关' },
+            { key: 'h', label: '对流 h', value: -result.bi / denominator, note: '强化对流会降低表面过余温度' },
+            { key: 'lambda', label: '导热 λ', value: result.bi / denominator, note: '导热增强使表面更接近热端' },
+            { key: 'delta', label: '半厚 δ', value: -result.bi / denominator, note: '增厚降低右表面过余温度' }
+          ], p);
+        }
+        return finalizeElasticities([
+          { key: 'deltaT', label: '温差 ΔT', value: 1, note: '线性正相关' },
+          { key: 'h', label: '对流 h', value: 1 / denominator, note: '对流热阻份额' },
+          { key: 'lambda', label: '导热 λ', value: result.bi / denominator, note: '导热热阻份额' },
+          { key: 'delta', label: '半厚 δ', value: -result.bi / denominator, note: '增厚使热流减小' }
+        ], p);
+      }
+      if (state.responseTarget === 'q') {
+        return finalizeElasticities([
+          { key: 'delta', label: '半厚 δ', value: 1, note: '表面热流线性增加' },
+          { key: 'phiv', label: '热源 Φᵥ', value: 1, note: '表面热流线性增加' },
+          { key: 'lambda', label: '导热 λ', value: 0, note: '只改温度梯度，不改总产热' }
+        ], p);
+      }
+      return finalizeElasticities([
+        { key: 'delta', label: '半厚 δ', value: 2, note: '中心温升呈平方关系' },
+        { key: 'phiv', label: '热源 Φᵥ', value: 1, note: '中心温升线性增加' },
+        { key: 'lambda', label: '导热 λ', value: -1, note: '导热增强使温升降低' }
+      ], p);
+    }
+
+    function responseValue(result, params = state.params) {
+      if (state.mode === 'S1') {
+        return state.responseTarget === 'surfaceExcess' ? result.tRight - params.tinf : result.q;
+      }
+      return state.responseTarget === 'q' ? result.q : result.rise;
+    }
+
+    function responseLabel() {
+      const option = responseOptions[state.mode].find((item) => item.key === state.responseTarget);
+      return option ? option.label : '响应量';
+    }
+
+    function responseUnit() {
+      if (state.mode === 'S1') return state.responseTarget === 'q' ? 'W/m²' : 'K';
+      return state.responseTarget === 'q' ? 'W/m²' : 'K';
+    }
+
+    function finalizeElasticities(items, params) {
+      const y0 = responseValue(calculate(params, state.mode), params);
+      if (Math.abs(y0) >= 1e-14) return items;
+      return items.map((item) => ({
+        ...item,
+        value: NaN,
+        note: '当前响应量为 0，归一化灵敏度未定义'
+      }));
+    }
+
+    function drawElasticity(canvas, compact = false) {
+      const items = getElasticities();
+      const { ctx, width: w, height: h } = setupCanvas(canvas, compact ? canvas.getBoundingClientRect().height || 160 : undefined);
+      const pad = compact ? { l: 74, r: 22, t: 16, b: 22 } : { l: 104, r: 42, t: 20, b: 34 };
+      const finiteValues = items.map((item) => Math.abs(item.value)).filter(Number.isFinite);
+      const maxAbs = Math.max(1, ...finiteValues) * 1.12;
+      const x0 = pad.l + (w - pad.l - pad.r) / 2;
+      const scale = (w - pad.l - pad.r) / (2 * maxAbs);
+      const rowHeight = (h - pad.t - pad.b) / items.length;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = GRID;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x0, pad.t - 4);
+      ctx.lineTo(x0, h - pad.b + 4);
+      ctx.stroke();
+      ctx.font = `${compact ? 9 : 11}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textBaseline = 'middle';
+
+      items.forEach((item, index) => {
+        const y = pad.t + rowHeight * index + rowHeight / 2;
+        ctx.fillStyle = INK;
+        ctx.textAlign = 'right';
+        ctx.fillText(item.label, pad.l - 10, y);
+        if (!Number.isFinite(item.value)) {
+          ctx.fillStyle = MUTED;
+          ctx.textAlign = 'left';
+          ctx.fillText('N/A', x0 + 7, y);
+          return;
+        }
+        const barLength = Math.abs(item.value) * scale;
+        ctx.fillStyle = item.value >= 0 ? ACCENT : INK;
+        const x = item.value >= 0 ? x0 : x0 - barLength;
+        ctx.fillRect(x, y - (compact ? 5 : 8), barLength, compact ? 10 : 16);
+        ctx.textAlign = item.value >= 0 ? 'left' : 'right';
+        const textX = item.value >= 0 ? x0 + barLength + 6 : x0 - barLength - 6;
+        ctx.fillText(`${item.value >= 0 ? '+' : ''}${item.value.toFixed(3)}`, textX, y);
+      });
+
+      ctx.fillStyle = MUTED;
+      ctx.textAlign = 'center';
+      ctx.fillText('0', x0, h - 11);
+      if (!compact) {
+        ctx.textAlign = 'left';
+        ctx.fillText('负向影响', pad.l, h - 11);
+        ctx.textAlign = 'right';
+        ctx.fillText('正向影响', w - pad.r, h - 11);
+      }
+    }
+
+    function applySweepFactor(baseParams, parameter, factor) {
+      const p = { ...baseParams };
+      if (parameter === 'deltaT') {
+        const baseDeltaT = baseParams.ts1 - baseParams.tinf;
+        const desired = clamp(baseDeltaT * factor, -20, 100);
+        let ts1 = baseParams.ts1;
+        let tinf = ts1 - desired;
+        if (tinf < 0) {
+          tinf = 0;
+          ts1 = desired;
+        } else if (tinf > 40) {
+          tinf = 40;
+          ts1 = desired + 40;
+        }
+        p.ts1 = clamp(ts1, 20, 100);
+        p.tinf = clamp(p.ts1 - desired, 0, 40);
+      } else {
+        const definition = [...commonDefinitions, ...s1Definitions, ...s2Definitions]
+          .find((item) => item.key === parameter);
+        const candidate = baseParams[parameter] * factor;
+        p[parameter] = definition ? clamp(candidate, definition.min, definition.max) : candidate;
+      }
+      return p;
+    }
+
+    function getSweepRows(span = state.sweepSpan / 100) {
+      const offsets = [-span, -span / 2, 0, span / 2, span];
+      const base = calculate();
+      const baseParameter = parameterValue(state.params, state.sweepParameter);
+      return offsets.map((requestedOffset) => {
+        const p = applySweepFactor(state.params, state.sweepParameter, 1 + requestedOffset);
+        const result = calculate(p, state.mode);
+        const target = responseValue(result, p);
+        const baseTarget = responseValue(base, state.params);
+        const actualParameter = parameterValue(p, state.sweepParameter);
+        const zeroBaseline = Math.abs(baseParameter) < 1e-14;
+        const offset = zeroBaseline ? NaN : actualParameter / baseParameter - 1;
+        return {
+          offset,
+          plotOffset: zeroBaseline ? requestedOffset : offset,
+          requestedOffset,
+          zeroBaseline,
+          clipped: !zeroBaseline && Math.abs(offset - requestedOffset) > 1e-9,
+          p,
+          result,
+          target,
+          relative: Math.abs(baseTarget) < 1e-14 ? NaN : target / baseTarget - 1
+        };
+      });
+    }
+
+    function parameterValue(p, parameter) {
+      if (parameter === 'deltaT') return p.ts1 - p.tinf;
+      return p[parameter];
+    }
+
+    function parameterUnit(parameter) {
+      return ({ deltaT: 'K', h: 'W/(m²·K)', lambda: 'W/(m·K)', delta: 'm', phiv: 'W/m³' })[parameter];
+    }
+
+    function sweepOffsetLabel(row) {
+      if (Math.abs(row.requestedOffset) < 1e-12) return '基准';
+      if (row.zeroBaseline) {
+        const requested = `${row.requestedOffset >= 0 ? '+' : ''}${(row.requestedOffset * 100).toFixed(1)}%`;
+        return `请求 ${requested}（零基准）`;
+      }
+      const label = `${row.offset >= 0 ? '+' : ''}${(row.offset * 100).toFixed(1)}%`;
+      return row.clipped ? `${label}（限值）` : label;
+    }
+
+    function drawSweep(canvas) {
+      const rows = getSweepRows();
+      const { ctx, width: w, height: h } = setupCanvas(canvas);
+      const pad = { l: 62, r: 28, t: 24, b: 44 };
+      const xValues = rows.map((row) => row.plotOffset * 100);
+      const validRelatives = rows.map((row) => row.relative * 100).filter(Number.isFinite);
+      const fallback = validRelatives.length ? validRelatives : [0];
+      const yAbs = Math.max(5, ...fallback.map(Math.abs)) * 1.18;
+      const xMin = Math.min(...xValues);
+      const xMax = Math.max(...xValues);
+      const px = (x) => pad.l + (x - xMin) / (xMax - xMin || 1) * (w - pad.l - pad.r);
+      const py = (y) => h - pad.b - (y + yAbs) / (2 * yAbs) * (h - pad.t - pad.b);
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = `11px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.textBaseline = 'middle';
+
+      [-yAbs, -yAbs / 2, 0, yAbs / 2, yAbs].forEach((value) => {
+        const y = py(value);
+        ctx.strokeStyle = value === 0 ? '#9da39c' : GRID;
+        ctx.lineWidth = value === 0 ? 1.3 : 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(w - pad.r, y);
+        ctx.stroke();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'right';
+        ctx.fillText(`${value.toFixed(0)}%`, pad.l - 8, y);
+      });
+
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2.8;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      let started = false;
+      rows.forEach((row) => {
+        if (!Number.isFinite(row.relative)) return;
+        const x = px(row.plotOffset * 100);
+        const y = py(row.relative * 100);
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      rows.forEach((row) => {
+        if (!Number.isFinite(row.relative)) return;
+        const x = px(row.plotOffset * 100);
+        const y = py(row.relative * 100);
+        ctx.fillStyle = ACCENT_DEEP;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = MUTED;
+        ctx.textAlign = 'center';
+        ctx.fillText(`${row.plotOffset >= 0 ? '+' : ''}${(row.plotOffset * 100).toFixed(0)}%${row.clipped ? '*' : ''}`, x, h - pad.b + 18);
+      });
+
+      ctx.fillStyle = MUTED;
+      ctx.textAlign = 'center';
+      ctx.fillText('参数相对基准变化', (pad.l + w - pad.r) / 2, h - 10);
+      ctx.save();
+      ctx.translate(14, (pad.t + h - pad.b) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(`${responseLabel()}相对变化`, 0, 0);
+      ctx.restore();
+    }
+
+    function renderSweepOptions() {
+      const options = sweepOptions[state.mode];
+      const responses = responseOptions[state.mode];
+      if (!options.some((item) => item.key === state.sweepParameter)) {
+        state.sweepParameter = state.mode === 'S1' ? 'h' : 'delta';
+      }
+      if (!responses.some((item) => item.key === state.responseTarget)) {
+        state.responseTarget = state.mode === 'S1' ? 'q' : 'rise';
+      }
+      $('responseTarget').innerHTML = responses.map((item) => `<option value="${item.key}">${item.label}</option>`).join('');
+      $('responseTarget').value = state.responseTarget;
+      $('sweepParameter').innerHTML = options.map((item) => `<option value="${item.key}">${item.label}</option>`).join('');
+      $('sweepParameter').value = state.sweepParameter;
+      $('sweepSpan').value = state.sweepSpan;
+      $('sweepSpanValue').textContent = `±${state.sweepSpan}%`;
+      const option = options.find((item) => item.key === state.sweepParameter);
+      const baseParameter = parameterValue(state.params, state.sweepParameter);
+      $('sweepDescription').textContent = Math.abs(baseParameter) < 1e-14
+        ? `扫描 ${option.label}，但当前基准为 0；乘法扰动后的参数仍为 0，实际相对变化无定义，CSV 将留空。`
+        : `扫描 ${option.label}，其余参数保持不变；纵轴为${responseLabel()}的相对变化，超出任务范围的点自动钳位并标 *。`;
+    }
+
+    function exactChange(parameter, offset) {
+      const base = calculate();
+      const p = applySweepFactor(state.params, parameter, 1 + offset);
+      const next = calculate(p, state.mode);
+      const y0 = responseValue(base, state.params);
+      const y1 = responseValue(next, p);
+      return Math.abs(y0) < 1e-14 ? NaN : y1 / y0 - 1;
+    }
+
+    function buildInsights() {
+      const elasticities = getElasticities();
+      const ranked = [...elasticities].sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+      const selected = sweepOptions[state.mode].find((item) => item.key === state.sweepParameter);
+      const baseResult = calculate();
+      const baseResponse = responseValue(baseResult, state.params);
+      if (Math.abs(baseResponse) < 1e-14) {
+        return [
+          { title: '归一化指标不适用', body: `当前${responseLabel()}为 0，S*=(p/y)(∂y/∂p) 的分母为 0，因此必须显示 N/A。` },
+          { title: '单因素相对变化不适用', body: '以零值作分母不能计算百分比变化。可改看绝对变化量，或选择非零基准工况。' },
+          { title: '物理极限成立', body: state.mode === 'S1' ? '驱动温差为 0 时，全场等温且热流为 0。' : '体积热源为 0 时，全场等于表面温度且热流为 0。' },
+          { title: '验收处理', body: '页面保留零值极限测试，同时把不适用的导数复核从测试分母中排除，避免假精度。' }
+        ];
+      }
+      const plus = exactChange(state.sweepParameter, 0.2);
+      const minus = exactChange(state.sweepParameter, -0.2);
+      let cards;
+      if (state.mode === 'S1') {
+        const r = calculateS1(state.params);
+        const convShare = r.rConv / r.rTotal;
+        const condShare = r.rCond / r.rTotal;
+        if (state.responseTarget === 'surfaceExcess') {
+          cards = [
+            { title: '响应量改变了结论', body: `${ranked[0].label} 的 |S*|=${Math.abs(ranked[0].value).toFixed(3)}；当前研究的是右表面相对流体的过余温度。` },
+            { title: '±20% 实验', body: `${selected.label} 增加 20% 时表面过余温度 ${percent(plus)}；减少 20% 时 ${percent(minus)}。` },
+            { title: '符号解释', body: `提高 h 会使 t(δ) 更接近 t∞，所以 S* 为负；提高 λ 会使右表面更接近热端，S* 为正。` },
+            { title: '基线依赖', body: `当前 Bi=${r.bi.toFixed(3)}。Bi 改变后，h、λ 与 δ 对表面温差的控制权也会改变。` }
+          ];
+        } else {
+          cards = [
+            { title: '主导参数', body: `${ranked[0].label} 的 |S*|=${Math.abs(ranked[0].value).toFixed(3)}，在当前工况下对 q 最敏感。` },
+            { title: '±20% 实验', body: `${selected.label} 增加 20% 时 q ${percent(plus)}；减少 20% 时 q ${percent(minus)}。` },
+            { title: '热阻解释', body: `总热阻中对流占 ${(convShare * 100).toFixed(1)}%，导热占 ${(condShare * 100).toFixed(1)}%。这正对应 h 与 λ 的灵敏度分配。` },
+            { title: '工程判断', body: r.bi < 0.1 ? 'Bi<0.1，内部导热很快，提高 λ 的边际收益较小，应优先改善对流侧。' : r.bi > 1 ? 'Bi>1，导热热阻占主导，减小厚度或提高 λ 更有效。' : 'Bi 位于 0.1-1，两类热阻均不可忽略，不能只优化单侧。' }
+          ];
+        }
+      } else {
+        if (state.responseTarget === 'q') {
+          cards = [
+            { title: '并列主导参数', body: '半厚 δ 与热源 Φᵥ 的 S* 均为 +1.000，单侧表面热流与二者线性正相关。' },
+            { title: '±20% 实验', body: `${selected.label} 增加 20% 时 q ${percent(plus)}；减少 20% 时 q ${percent(minus)}。` },
+            { title: '零灵敏度不是无作用', body: 'λ 对稳态 q 的 S*=0，但会显著改变中心温升与温度曲率，不能据此说 λ 不重要。' },
+            { title: '能量解释', body: '稳态时表面必须排出全部体积产热，所以 q=Φᵥδ，与导热系数无关。' }
+          ];
+        } else {
+          cards = [
+            { title: '主导参数', body: `半厚 δ 的 S*=+2.000，中心温升对厚度最敏感，且为平方关系。` },
+            { title: '±20% 实验', body: `${selected.label} 增加 20% 时 Δt_c ${percent(plus)}；减少 20% 时 Δt_c ${percent(minus)}。` },
+            { title: '跨输出区别', body: 'λ 会改变中心温升，却不改变稳态表面热流 q=Φᵥδ。热流由总产热量决定。' },
+            { title: '工程判断', body: '控温优先减小半厚 δ，其次降低 Φᵥ 或提高 λ；若只看 q，会遗漏 λ 对最高温度的关键作用。' }
+          ];
+        }
+      }
+      return cards;
+    }
+
+    function renderInsights() {
+      $('insightGrid').innerHTML = buildInsights().map((card) => `
+        <article class="insight"><strong>${escapeHtml(card.title)}</strong><p>${escapeHtml(card.body)}</p></article>
+      `).join('');
+    }
+
+    function renderSweepTable() {
+      const rows = getSweepRows();
+      const parameterLabel = sweepOptions[state.mode].find((item) => item.key === state.sweepParameter).label;
+      const targetLabel = responseLabel();
+      if (state.mode === 'S1') {
+        $('sweepTableHead').innerHTML = `<tr><th>相对变化</th><th>${parameterLabel}</th><th>q (W/m²)</th><th>${targetLabel}相对变化</th><th>t(δ) (°C)</th><th>Φ (W)</th></tr>`;
+        $('sweepTableBody').innerHTML = rows.map((row) => `
+          <tr class="${Math.abs(row.requestedOffset) < 1e-12 ? 'base-row' : ''}">
+            <td>${sweepOffsetLabel(row)}</td>
+            <td>${fixedSmart(parameterValue(row.p, state.sweepParameter), state.sweepParameter === 'delta' ? 4 : 2)} ${parameterUnit(state.sweepParameter)}</td>
+            <td>${fixedSmart(row.result.q, 2)}</td>
+            <td>${Math.abs(row.requestedOffset) < 1e-12 && Number.isFinite(row.relative) ? '0.0%' : percent(row.relative)}</td>
+            <td>${fixedSmart(row.result.tRight, 2)}</td>
+            <td>${fixedSmart(row.result.phi, 2)}</td>
+          </tr>`).join('');
+      } else {
+        $('sweepTableHead').innerHTML = `<tr><th>相对变化</th><th>${parameterLabel}</th><th>Δt_c (K)</th><th>${targetLabel}相对变化</th><th>t_c (°C)</th><th>q (W/m²)</th></tr>`;
+        $('sweepTableBody').innerHTML = rows.map((row) => `
+          <tr class="${Math.abs(row.requestedOffset) < 1e-12 ? 'base-row' : ''}">
+            <td>${sweepOffsetLabel(row)}</td>
+            <td>${fixedSmart(parameterValue(row.p, state.sweepParameter), state.sweepParameter === 'delta' ? 4 : 2)} ${parameterUnit(state.sweepParameter)}</td>
+            <td>${fixedSmart(row.result.rise, 3)}</td>
+            <td>${Math.abs(row.requestedOffset) < 1e-12 && Number.isFinite(row.relative) ? '0.0%' : percent(row.relative)}</td>
+            <td>${fixedSmart(row.result.centerTemp, 2)}</td>
+            <td>${fixedSmart(row.result.q, 2)}</td>
+          </tr>`).join('');
+      }
+    }
+
+    function runTests() {
+      const tests = [];
+      const s1 = calculateS1({ delta: 0.05, lambda: 1.2, h: 10, ts1: 100, tinf: 20, area: 1, rho: 800, cp: 2000 });
+      const s1QError = Math.abs(s1.q - 564.7) / 564.7;
+      tests.push({ title: 'S1 参考热流', detail: `计算 ${s1.q.toFixed(2)} W/m²，任务单 564.7 W/m²`, error: s1QError, pass: s1QError < 0.001 });
+      const s1TError = Math.abs(s1.tRight - 76.47) / 76.47;
+      tests.push({ title: 'S1 右表面温度', detail: `计算 ${s1.tRight.toFixed(3)} °C，任务单 76.47 °C`, error: s1TError, pass: s1TError < 0.001 });
+      const qCond = 1.2 * (100 - s1.tRight) / 0.05;
+      const qConv = 10 * (s1.tRight - 20);
+      const s1BoundaryError = Math.abs(qCond - qConv) / Math.max(Math.abs(qCond), Math.abs(qConv), 1e-14);
+      tests.push({ title: 'S1 边界热流连续', detail: `q_cond=${qCond.toFixed(6)}，q_conv=${qConv.toFixed(6)} W/m²`, error: s1BoundaryError, pass: s1BoundaryError < 1e-12 });
+
+      const s2 = calculateS2({ delta: 0.05, lambda: 1.2, phiv: 5000, ts: 20, area: 1, rho: 800, cp: 2000 });
+      const s2TError = Math.abs(s2.centerTemp - 25.2083333333) / 25.2083333333;
+      tests.push({ title: 'S2 中心温度', detail: `计算 ${s2.centerTemp.toFixed(3)} °C，解析值 25.208 °C`, error: s2TError, pass: s2TError < 1e-9 });
+      const s2QError = Math.abs(s2.q - 250) / 250;
+      tests.push({ title: 'S2 单侧表面热流', detail: `计算 ${s2.q.toFixed(3)} W/m²，任务单 250 W/m²`, error: s2QError, pass: s2QError < 1e-12 });
+      const energyError = Math.abs(s2.phiTotal - s2.generated) / Math.max(1, Math.abs(s2.generated));
+      tests.push({ title: 'S2 能量守恒', detail: `双侧散热 ${s2.phiTotal.toFixed(2)} W，体积产热 ${s2.generated.toFixed(2)} W`, error: energyError, pass: energyError < 1e-12 });
+
+      const p = { ...state.params };
+      const eps = 1e-5;
+      const base = calculate(p, state.mode);
+      const elasticities = getElasticities();
+      const y0 = responseValue(base, p);
+      if (Math.abs(y0) < 1e-14) {
+        tests.push({ title: '灵敏度解析式复核', detail: '当前响应量为 0，归一化灵敏度不适用', error: NaN, pass: null });
+      } else {
+        let maxDerivativeError = 0;
+        elasticities.forEach((item) => {
+          const pPlus = applySweepFactor(p, item.key, 1 + eps);
+          const pMinus = applySweepFactor(p, item.key, 1 - eps);
+          const yPlusResult = calculate(pPlus, state.mode);
+          const yMinusResult = calculate(pMinus, state.mode);
+          const yPlus = responseValue(yPlusResult, pPlus);
+          const yMinus = responseValue(yMinusResult, pMinus);
+          const baseParameter = parameterValue(p, item.key);
+          const plusParameter = parameterValue(pPlus, item.key);
+          const minusParameter = parameterValue(pMinus, item.key);
+          const plusFraction = Math.abs(baseParameter) < 1e-14 ? eps : plusParameter / baseParameter - 1;
+          const minusFraction = Math.abs(baseParameter) < 1e-14 ? -eps : minusParameter / baseParameter - 1;
+          const fractionWidth = plusFraction - minusFraction;
+          if (Math.abs(fractionWidth) < 1e-14) return;
+          const numeric = (yPlus - yMinus) / (fractionWidth * y0);
+          maxDerivativeError = Math.max(maxDerivativeError, Math.abs(numeric - item.value));
+        });
+        tests.push({ title: '灵敏度解析式复核', detail: `有限差分与解析 S* 最大偏差 ${maxDerivativeError.toExponential(2)}`, error: maxDerivativeError, pass: maxDerivativeError < 5e-5 });
+      }
+
+      const s1Zero = calculateS1({ delta: 0.05, lambda: 1.2, h: 10, ts1: 20, tinf: 20, area: 1, rho: 800, cp: 2000 });
+      const s2Zero = calculateS2({ delta: 0.05, lambda: 1.2, phiv: 0, ts: 20, area: 1, rho: 800, cp: 2000 });
+      const zeroError = Math.max(Math.abs(s1Zero.q), Math.abs(s1Zero.tRight - 20), Math.abs(s2Zero.q), Math.abs(s2Zero.centerTemp - 20));
+      tests.push({ title: '零驱动力极限', detail: 'ΔT=0 与 Φᵥ=0 时均恢复等温、零热流', error: zeroError, pass: zeroError < 1e-12 });
+      return tests;
+    }
+
+    function renderTests() {
+      const tests = runTests();
+      const applicable = tests.filter((test) => test.pass !== null);
+      const passed = tests.filter((test) => test.pass).length;
+      $('heroTestScore').textContent = `${passed}/${applicable.length}`;
+      $('testList').innerHTML = tests.map((test) => `
+        <div class="test-item ${test.pass === null ? 'na' : test.pass ? '' : 'fail'}">
+          <span class="test-state">${test.pass === null ? 'N/A' : test.pass ? 'PASS' : 'FAIL'}</span>
+          <div><div class="test-title">${escapeHtml(test.title)}</div><div class="test-detail">${escapeHtml(test.detail)}</div></div>
+          <div class="test-error">${test.pass === null ? '不适用' : `误差 ${test.error.toExponential(2)}`}</div>
+        </div>
+      `).join('');
+      return { passed, total: applicable.length, skipped: tests.length - applicable.length };
+    }
+
+    function buildReport() {
+      const p = state.params;
+      const r = calculate();
+      const insights = buildInsights();
+      $('reportTeam').textContent = $('teamName').value || '未填写课程与班级';
+      $('reportMembers').textContent = $('memberNames').value || '未填写成员';
+      $('reportDateText').textContent = $('reportDate').value || '未填写';
+
+      if (state.mode === 'S1') {
+        $('reportModelText').innerHTML = `S1 无内热源，x∈[0,δ]。δ=${fixedSmart(p.delta, 3)} m，λ=${fixedSmart(p.lambda, 1)} W/(m·K)，h=${fixedSmart(p.h, 1)} W/(m²·K)，tₛ₁=${fixedSmart(p.ts1, 1)} °C，t∞=${fixedSmart(p.tinf, 1)} °C，A=${fixedSmart(p.area, 2)} m²。Bi=${fixedSmart(r.bi, 3)}，a=${r.diffusivity.toExponential(3)} m²/s。`;
+        $('reportKeyNumber').innerHTML = `${fixedSmart(r.q, 1)} W/m²<small>q，右表面 ${fixedSmart(r.tRight, 2)} °C，总传热量 ${fixedSmart(r.phi, 1)} W</small>`;
+        $('reportMethod').textContent = `以${responseLabel()}为响应量。先求解析局部灵敏度 S*，再固定其余参数进行单因素扫描。`;
+        $('reportEquation').textContent = state.responseTarget === 'q'
+          ? 'q=(tₛ₁-t∞)/(δ/λ+1/h)，t(x)=tₛ₁-(q/λ)x。'
+          : 't(δ)-t∞=(tₛ₁-t∞)/(1+Bi)，Bi=hδ/λ。';
+      } else {
+        $('reportModelText').innerHTML = `S2 均匀内热源，x∈[-δ,δ]。δ=${fixedSmart(p.delta, 3)} m，λ=${fixedSmart(p.lambda, 1)} W/(m·K)，Φᵥ=${fixedSmart(p.phiv, 0)} W/m³，tₛ=${fixedSmart(p.ts, 1)} °C，A=${fixedSmart(p.area, 2)} m²。a=${r.diffusivity.toExponential(3)} m²/s。`;
+        $('reportKeyNumber').innerHTML = `${fixedSmart(r.centerTemp, 2)} °C<small>中心温度，温升 ${fixedSmart(r.rise, 3)} K，双侧总散热 ${fixedSmart(r.phiTotal, 1)} W</small>`;
+        $('reportMethod').textContent = `以${responseLabel()}为响应量。先求解析局部灵敏度 S*，再固定其余参数进行单因素扫描。`;
+        $('reportEquation').textContent = state.responseTarget === 'q'
+          ? 'q_s=Φᵥδ；λ 只改变温度梯度，不改变稳态总产热。'
+          : 'Δt_c=Φᵥδ²/(2λ)，q_s=Φᵥδ，双侧能量严格闭合。';
+      }
+
+      $('reportFindings').innerHTML = insights.slice(0, 3).map((item) => `
+        <div class="report-finding"><b>${escapeHtml(item.title)}</b>${escapeHtml(item.body)}</div>
+      `).join('');
+
+      const selectedLabel = sweepOptions[state.mode].find((item) => item.key === state.sweepParameter).label;
+      const reportRows = getSweepRows(0.2).filter((row) =>
+        Math.abs(row.requestedOffset) < 1e-12 || Math.abs(Math.abs(row.requestedOffset) - 0.2) < 1e-12
+      );
+      $('reportMiniHead').innerHTML = `<tr><th>${selectedLabel}</th><th>${responseLabel()}</th><th>相对变化</th></tr>`;
+      $('reportMiniBody').innerHTML = reportRows.map((row) => {
+        const isBase = Math.abs(row.requestedOffset) < 1e-12;
+        return `<tr><td>${sweepOffsetLabel(row)}</td><td>${fixedSmart(row.target, 2)}</td><td>${isBase && Number.isFinite(row.relative) ? '0.0%' : percent(row.relative)}</td></tr>`;
+      }).join('');
+
+      const test = renderTests();
+      $('reportValidation').textContent = `内置测试 ${test.passed}/${test.total} 通过${test.skipped ? `，${test.skipped} 项 N/A` : ''}；当前计算采用双精度解析式。`;
+      $('reportSource').textContent = state.source;
+      requestAnimationFrame(() => {
+        drawTemperature($('reportTemperatureChart'), true);
+        drawElasticity($('reportElasticityChart'), true);
+      });
+    }
+
+    function renderAccessibleSummary(result) {
+      $('accessibleSummary').textContent = state.mode === 'S1'
+        ? `当前 S1 工况：热流 ${result.q.toFixed(2)} W/m²，右表面温度 ${result.tRight.toFixed(2)} °C，Bi ${result.bi.toFixed(3)}。`
+        : `当前 S2 工况：中心温度 ${result.centerTemp.toFixed(2)} °C，表面热流 ${result.q.toFixed(2)} W/m²，双侧总散热 ${result.phiTotal.toFixed(2)} W。`;
+    }
+
+    function renderAll() {
+      const result = calculate();
+      renderModeButtons();
+      renderMaterial();
+      renderMetrics(result);
+      renderWarnings(result);
+      renderSweepOptions();
+      renderInsights();
+      renderSweepTable();
+      renderAccessibleSummary(result);
+      renderTests();
+      requestAnimationFrame(() => {
+        drawTemperature($('temperatureChart'));
+        drawElasticity($('elasticityChart'));
+        drawSweep($('sweepChart'));
+        buildReport();
+      });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      state.sweepParameter = mode === 'S1' ? 'h' : 'delta';
+      state.responseTarget = mode === 'S1' ? 'q' : 'rise';
+      buildControls();
+      renderAll();
+      showToast(`已切换到 ${mode} 模型，报告和敏感性分析同步更新。`);
+    }
+
+    function applyMaterial(key) {
+      state.material = key;
+      const material = materials[key];
+      if (key !== 'custom') {
+        state.params.rho = material.rho;
+        state.params.cp = material.cp;
+        state.params.lambda = material.lambda;
+        state.source = material.source;
+      } else {
+        state.source = material.source;
+      }
+      buildControls();
+      renderAll();
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function exportCsv() {
+      const rows = getSweepRows();
+      const parameter = state.sweepParameter;
+      const targetName = responseLabel();
+      const headers = state.mode === 'S1'
+        ? ['requested_relative_change', 'actual_relative_change', 'clipped_to_task_range', parameter, 'response_name', 'response_value', 'response_relative_change', 'q_W_m2', 'surface_excess_K', 'surface_temperature_C', 'heat_rate_W']
+        : ['requested_relative_change', 'actual_relative_change', 'clipped_to_task_range', parameter, 'response_name', 'response_value', 'response_relative_change', 'center_rise_K', 'center_temperature_C', 'surface_flux_W_m2', 'total_heat_rate_W'];
+      const data = rows.map((row) => state.mode === 'S1'
+        ? [row.requestedOffset, row.offset, row.clipped, parameterValue(row.p, parameter), targetName, row.target, row.relative, row.result.q, row.result.tRight - row.p.tinf, row.result.tRight, row.result.phi]
+        : [row.requestedOffset, row.offset, row.clipped, parameterValue(row.p, parameter), targetName, row.target, row.relative, row.result.rise, row.result.centerTemp, row.result.q, row.result.phiTotal]
+      );
+      const csvCell = (cell) => {
+        if (cell == null || (typeof cell === 'number' && !Number.isFinite(cell))) return '';
+        const text = String(cell);
+        return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+      };
+      const csv = '\uFEFF' + [headers, ...data].map((line) => line.map(csvCell).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `第四组_${state.mode}_${parameter}_参数扫描.csv`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      showToast('实验数据已导出为 CSV。');
+    }
+
+    function resetState() {
+      const fresh = cloneValue(defaults);
+      Object.assign(state, fresh);
+      buildControls();
+      renderAll();
+      showToast('已恢复任务单 S1 参考工况。');
+    }
+
+    function printReport() {
+      buildReport();
+      setTimeout(() => window.print(), 80);
+    }
+
+    function debounce(fn, delay) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    $('modeS1').addEventListener('click', () => setMode('S1'));
+    $('modeS2').addEventListener('click', () => setMode('S2'));
+    $('materialSelect').addEventListener('change', (event) => applyMaterial(event.target.value));
+    $('sourceInput').addEventListener('input', (event) => { state.source = event.target.value; buildReport(); renderWarnings(calculate()); });
+    $('responseTarget').addEventListener('change', (event) => { state.responseTarget = event.target.value; renderAll(); });
+    $('sweepParameter').addEventListener('change', (event) => { state.sweepParameter = event.target.value; renderAll(); });
+    $('sweepSpan').addEventListener('input', (event) => { state.sweepSpan = Number(event.target.value); renderAll(); });
+    $('csvButton').addEventListener('click', exportCsv);
+    $('resetButton').addEventListener('click', resetState);
+    $('printButton').addEventListener('click', printReport);
+    $('printReportButton').addEventListener('click', printReport);
+    ['teamName', 'memberNames', 'reportDate'].forEach((id) => $(id).addEventListener('input', buildReport));
+    window.addEventListener('resize', debounce(renderAll, 160));
+
+    const today = new Date();
+    const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    $('reportDate').value = localDate;
+    buildControls();
+    renderAll();
+  </script>
+</body>
+</html>
